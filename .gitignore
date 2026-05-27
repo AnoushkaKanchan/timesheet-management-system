@@ -1,0 +1,58 @@
+# ===========================
+# Python
+# ===========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+backend/venv/
+venv/
+
+# Environment Variables
+.env
+.env.*
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+
+# Static & Media
+backend/staticfiles/
+backend/media/
+
+# Migrations (optional for early dev)
+# Uncomment only if needed
+# */migrations/*
+# !*/migrations/__init__.py
+
+# IDE
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js
+frontend/node_modules/
+
+# React Build
+frontend/dist/
+frontend/build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+*.swp
+*.swo
