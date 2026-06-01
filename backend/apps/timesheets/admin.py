@@ -14,7 +14,9 @@ class TimesheetMasterAdmin(admin.ModelAdmin):
         "user",
         "submission_date",
         "status",
+        "is_locked",
         "submitted_at",
+        "sent_to_client_at",
     )
 
     search_fields = (
@@ -23,6 +25,7 @@ class TimesheetMasterAdmin(admin.ModelAdmin):
 
     list_filter = (
         "status",
+        "is_locked",
         "submission_date",
     )
 

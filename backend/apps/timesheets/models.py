@@ -9,6 +9,7 @@ class TimesheetMaster(models.Model):
         ("PENDING", "Pending"),
         ("APPROVED", "Approved"),
         ("REJECTED", "Rejected"),
+        ("SENT_TO_CLIENT", "Sent To Client"),
     ]
 
     user = models.ForeignKey(
@@ -23,6 +24,15 @@ class TimesheetMaster(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default="PENDING"
+    )
+    
+    is_locked = models.BooleanField(
+    default=False
+    )
+
+    sent_to_client_at = models.DateTimeField(
+        null=True,
+        blank=True
     )
 
     submitted_at = models.DateTimeField(
