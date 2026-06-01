@@ -1,6 +1,6 @@
 
 from django.db import models
-
+from django.conf import settings
 
 class Project(models.Model):
 
@@ -42,3 +42,27 @@ class Project(models.Model):
 
     def __str__(self):
         return self.project_name
+    
+class ProjectAssignment(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="project_assignments"
+    )
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name="project_assignments"
+    )
+
+    assigned_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        unique_together = ("user", "project")
+
+    def __str__(self):
+        return f"{self.user.email} - {self.project.project_name}"
