@@ -1,7 +1,5 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
+from apps.projects.models import Project
 from django.conf import settings
 
 
@@ -59,3 +57,39 @@ class TimesheetMaster(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.submission_date}"
+    
+    
+class TimesheetDetail(models.Model):
+
+    timesheet_master = models.ForeignKey(
+        TimesheetMaster,
+        on_delete=models.CASCADE,
+        related_name="timesheet_details"
+    )
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name="timesheet_entries"
+    )
+
+    hours_worked = models.DecimalField(
+        max_digits=5,
+        decimal_places=2
+    )
+
+    task_description = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return (
+            f"{self.project.project_name} "
+            f"- {self.hours_worked} hrs"
+        )
