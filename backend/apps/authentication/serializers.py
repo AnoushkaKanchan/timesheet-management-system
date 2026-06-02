@@ -3,7 +3,7 @@ from apps.users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(source="role.role_name")
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -14,6 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "role",
         )
+
+    def get_role(self, obj):
+        return obj.role.role_name if obj.role else None
 
 
 class LoginSerializer(serializers.Serializer):
