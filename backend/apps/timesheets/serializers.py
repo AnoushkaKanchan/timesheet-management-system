@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import TimesheetMaster
-
+from .models import TimesheetMaster, TimesheetDetail
 
 class TimesheetMasterSerializer(serializers.ModelSerializer):
 
@@ -36,4 +35,24 @@ class TimesheetMasterSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "status",
+        ]
+
+class TimesheetDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TimesheetDetail
+        fields = [
+            "id",
+            "timesheet_master",
+            "project",
+            "hours_worked",
+            "task_description",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
         ]
