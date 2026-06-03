@@ -22,6 +22,8 @@ from .permissions import (
     IsDetailOwnerOrAdmin
 )
 
+from rest_framework.exceptions import PermissionDenied
+
 class TimesheetListCreateView(generics.ListCreateAPIView):
 
     serializer_class = TimesheetMasterSerializer
@@ -138,6 +140,16 @@ class TimesheetDetailListCreateView(generics.ListCreateAPIView):
             timesheet_master__user=self.request.user
         )
 
+    def perform_create(self, serializer):
+
+        timesheet_master = serializer.validated_data["timesheet_master"]
+
+        if timesheet_master.is_locked:
+            raise PermissionDenied(
+                "Cannot add details to a locked timesheet."
+            )
+
+        serializer.save()
 
 class TimesheetDetailRetrieveUpdateDestroyView(
     generics.RetrieveUpdateDestroyAPIView
@@ -157,3 +169,23 @@ class TimesheetDetailRetrieveUpdateDestroyView(
         return TimesheetDetail.objects.filter(
             timesheet_master__user=self.request.user
         )
+
+    def perform_update(self, serializer):
+
+        detail = self.get_object()
+
+        if detail.timesheet_master.is_locked:
+            raise PermissionDenied(
+                "Cannot modify details of a locked timesheet."
+            )
+
+        serializer.save()
+
+    def perform_destroy(self, instance):
+
+        if instance.timesheet_master.is_locked:
+            raise PermissionDenied(
+                "Cannot delete details from a locked timesheet."
+            )
+
+        instance.delete()
