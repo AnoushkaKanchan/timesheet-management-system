@@ -1,8 +1,17 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
+
 import {
   setTokens,
   removeTokens,
+  getAccessToken,
 } from "../utils/tokenStorage";
+
+import { getCurrentUser } from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -11,6 +20,8 @@ export const AuthProvider = ({ children }) => {
 
   const [isAuthenticated, setIsAuthenticated] =
     useState(false);
+
+  const [loading, setLoading] = useState(true);
 
   const login = ({ access, refresh, user }) => {
     setTokens(access, refresh);
@@ -28,11 +39,38 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const token = getAccessToken();
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const currentUser =
+          await getCurrentUser();
+
+        setUser(currentUser);
+
+        setIsAuthenticated(true);
+      } catch (error) {
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated,
+        loading,
         login,
         logout,
       }}
