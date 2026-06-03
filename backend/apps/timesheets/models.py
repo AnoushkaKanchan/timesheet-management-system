@@ -36,7 +36,8 @@ class TimesheetMaster(models.Model):
     )
 
     submitted_at = models.DateTimeField(
-        auto_now_add=True
+        null=True,
+        blank=True
     )
 
     reviewed_at = models.DateTimeField(
