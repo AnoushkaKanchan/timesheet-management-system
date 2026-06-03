@@ -12,6 +12,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
+from .models import TimesheetMaster, TimesheetDetail
+from .serializers import (
+    TimesheetMasterSerializer,
+    TimesheetDetailSerializer
+)
+from .permissions import (
+    IsOwnerOrAdmin,
+    IsDetailOwnerOrAdmin
+)
+
 class TimesheetListCreateView(generics.ListCreateAPIView):
 
     serializer_class = TimesheetMasterSerializer
@@ -112,4 +122,38 @@ class SubmitTimesheetView(APIView):
                 "message": "Timesheet submitted successfully"
             },
             status=status.HTTP_200_OK
+        )
+    
+class TimesheetDetailListCreateView(generics.ListCreateAPIView):
+
+    serializer_class = TimesheetDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+
+        if self.request.user.is_staff:
+            return TimesheetDetail.objects.all()
+
+        return TimesheetDetail.objects.filter(
+            timesheet_master__user=self.request.user
+        )
+
+
+class TimesheetDetailRetrieveUpdateDestroyView(
+    generics.RetrieveUpdateDestroyAPIView
+):
+
+    serializer_class = TimesheetDetailSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsDetailOwnerOrAdmin
+    ]
+
+    def get_queryset(self):
+
+        if self.request.user.is_staff:
+            return TimesheetDetail.objects.all()
+
+        return TimesheetDetail.objects.filter(
+            timesheet_master__user=self.request.user
         )
