@@ -24,6 +24,10 @@ from .permissions import (
 
 from rest_framework.exceptions import PermissionDenied
 
+from django.db.models import DecimalField, Sum
+from django.db.models.functions import Coalesce
+from django.db.models import Value
+
 class TimesheetListCreateView(generics.ListCreateAPIView):
 
     serializer_class = TimesheetMasterSerializer
@@ -33,12 +37,22 @@ class TimesheetListCreateView(generics.ListCreateAPIView):
 
         user = self.request.user
 
-        if user.role.role_name == "Admin":
-            return TimesheetMaster.objects.all()
-
-        return TimesheetMaster.objects.filter(
-            user=user
+        queryset = TimesheetMaster.objects.annotate(
+            total_hours=Coalesce(
+                Sum("timesheet_details__hours_worked"),
+                Value(
+                    0,
+                    output_field=DecimalField(
+                        max_digits=5,
+                        decimal_places=2
+                    )
+                )
+            )
         )
+        if user.role.role_name == "Admin":
+            return queryset
+
+        return queryset.filter(user=user)
 
     def perform_create(self, serializer):
 
@@ -46,6 +60,7 @@ class TimesheetListCreateView(generics.ListCreateAPIView):
             user=self.request.user
         )
 
+    
 
 class TimesheetRetrieveUpdateDeleteView(
     generics.RetrieveUpdateDestroyAPIView
@@ -133,16 +148,29 @@ class TimesheetDetailListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
 
-        if self.request.user.is_staff:
-            return TimesheetDetail.objects.all()
+        queryset = TimesheetDetail.objects.all()
 
-        return TimesheetDetail.objects.filter(
-            timesheet_master__user=self.request.user
+        timesheet_master_id = self.request.query_params.get(
+            "timesheet_master"
         )
+
+        if timesheet_master_id:
+            queryset = queryset.filter(
+                timesheet_master_id=timesheet_master_id
+            )
+
+        if self.request.user.role.role_name != "Admin":
+            queryset = queryset.filter(
+                timesheet_master__user=self.request.user
+            )
+
+        return queryset
 
     def perform_create(self, serializer):
 
-        timesheet_master = serializer.validated_data["timesheet_master"]
+        timesheet_master = serializer.validated_data[
+            "timesheet_master"
+        ]
 
         if timesheet_master.is_locked:
             raise PermissionDenied(
