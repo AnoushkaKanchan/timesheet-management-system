@@ -1,12 +1,7 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import AdminLayout from "../../layouts/AdminLayout";
-
+import ProjectsTable from "../../components/projects/ProjectsTable";
 import ProjectModal from "../../components/projects/ProjectModal";
-
 import {
   getProjects,
   createProject,
@@ -15,20 +10,28 @@ import {
 } from "../../services/projectService";
 
 function Projects() {
-  const [projects, setProjects] =
-    useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [loadingProjects, setLoadingProjects] = useState(true);
 
-  const [loading, setLoading] =
-    useState(false);
+  // PRODUCTION REFINEMENT: Dynamic DRF Error Parser Helper
+  const getErrorMessage = (error) => {
+    const data = error.response?.data;
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+    if (typeof data === "string") return data;
+    if (data?.detail) return data.detail;
 
-  const [isModalOpen, setIsModalOpen] =
-    useState(false);
+    const firstField = Object.keys(data || {})[0];
+    if (firstField) {
+      const fieldError = data[firstField];
+      return `${firstField}: ${Array.isArray(fieldError) ? fieldError[0] : fieldError}`;
+    }
 
-  const [selectedProject, setSelectedProject] =
-    useState(null);
+    return "Something went wrong";
+  };
 
   useEffect(() => {
     fetchProjects();
@@ -36,12 +39,13 @@ function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const data =
-        await getProjects();
-
-      setProjects(data);
+      setLoadingProjects(true);
+      const data = await getProjects();
+      setProjects(data || []);
     } catch (error) {
-      console.error(error);
+      alert(getErrorMessage(error));
+    } finally {
+      setLoadingProjects(false);
     }
   };
 
@@ -55,73 +59,73 @@ function Projects() {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (
-    formData
-  ) => {
+  const handleSubmit = async (formData) => {
     try {
       setLoading(true);
 
       if (selectedProject) {
-        await updateProject(
-          selectedProject.id,
-          formData
-        );
+        await updateProject(selectedProject.id, formData);
       } else {
-        await createProject(
-          formData
-        );
+        await createProject(formData);
       }
 
       await fetchProjects();
 
+      setSelectedProject(null);
       setIsModalOpen(false);
     } catch (error) {
-      console.error(error);
+      alert(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (
-    id
-  ) => {
-    const confirmed =
-      window.confirm(
-        "Delete this project?"
-      );
-
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Delete this project?");
     if (!confirmed) return;
 
     try {
       await deleteProject(id);
-
-      fetchProjects();
+      setProjects((prev) => prev.filter((project) => project.id !== id));
     } catch (error) {
-      console.error(error);
+      alert(getErrorMessage(error));
     }
   };
 
-  const filteredProjects =
-    projects.filter((project) =>
-      project.project_name
-        .toLowerCase()
-        .includes(
-          searchTerm.toLowerCase()
-        )
+  const handleModalClose = () => {
+    setSelectedProject(null);
+    setIsModalOpen(false);
+  };
+
+  // EXACT REPLACEMENT: Using the short-circuit OR operator sequence to handle empty backend rows
+  const filteredProjects = projects.filter((project) =>
+    (project.project_name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
+  if (loadingProjects) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-10 text-slate-500 font-medium">
+          Loading projects...
+        </div>
+      </AdminLayout>
     );
+  }
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">
-            Projects
-          </h1>
+      <div className="space-y-6 max-w-[1600px] mx-auto w-full">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-[#0F172A]">Projects</h1>
+            <p className="text-xs text-slate-400 mt-0.5">Manage and monitor core workspace parameters.</p>
+          </div>
 
           <button
             onClick={handleCreate}
-            className="bg-orange-500 text-white px-4 py-2 rounded"
+            className="bg-[#4F46E5] hover:bg-[#0F172A] text-white px-4 py-2 rounded text-sm font-semibold shadow-sm transition-colors"
           >
             Create Project
           </button>
@@ -129,104 +133,21 @@ function Projects() {
 
         <input
           type="text"
-          placeholder="Search project..."
+          placeholder="Search project by name..."
           value={searchTerm}
-          onChange={(e) =>
-            setSearchTerm(
-              e.target.value
-            )
-          }
-          className="border p-2 rounded w-full"
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border border-slate-300 p-2.5 rounded-lg w-full text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm"
         />
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-3 text-left">
-                  Name
-                </th>
-                <th className="p-3 text-left">
-                  Status
-                </th>
-                <th className="p-3 text-left">
-                  Start Date
-                </th>
-                <th className="p-3 text-left">
-                  End Date
-                </th>
-                <th className="p-3 text-left">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredProjects.map(
-                (project) => (
-                  <tr
-                    key={project.id}
-                    className="border-t"
-                  >
-                    <td className="p-3">
-                      {
-                        project.project_name
-                      }
-                    </td>
-
-                    <td className="p-3">
-                      {
-                        project.status
-                      }
-                    </td>
-
-                    <td className="p-3">
-                      {
-                        project.start_date
-                      }
-                    </td>
-
-                    <td className="p-3">
-                      {
-                        project.end_date
-                      }
-                    </td>
-
-                    <td className="p-3 flex gap-2">
-                      <button
-                        onClick={() =>
-                          handleEdit(
-                            project
-                          )
-                        }
-                        className="bg-blue-500 text-white px-3 py-1 rounded"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            project.id
-                          )
-                        }
-                        className="bg-red-500 text-white px-3 py-1 rounded"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
+        <ProjectsTable
+          projects={filteredProjects}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
         <ProjectModal
           isOpen={isModalOpen}
-          onClose={() =>
-            setIsModalOpen(false)
-          }
+          onClose={handleModalClose}
           project={selectedProject}
           onSubmit={handleSubmit}
           loading={loading}
