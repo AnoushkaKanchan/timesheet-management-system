@@ -1,6 +1,37 @@
+import { useEffect, useState } from "react";
+
 import AdminLayout from "../../layouts/AdminLayout";
 
+import ProjectsTable from "../../components/projects/ProjectsTable";
+
+import { getProjects } from "../../services/projectService";
+
 function Projects() {
+  const [projects, setProjects] = useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data =
+          await getProjects();
+
+        setProjects(data);
+      } catch (error) {
+        console.error(
+          "Failed to fetch projects",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -26,88 +57,19 @@ function Projects() {
           <input
             type="text"
             placeholder="Search projects..."
-            className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-slate-300 rounded-lg px-4 py-2"
           />
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="text-left p-4">
-                  Project Name
-                </th>
-
-                <th className="text-left p-4">
-                  Client
-                </th>
-
-                <th className="text-left p-4">
-                  Status
-                </th>
-
-                <th className="text-left p-4">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr className="border-t">
-                <td className="p-4">
-                  Website Redesign
-                </td>
-
-                <td className="p-4">
-                  ABC Corp
-                </td>
-
-                <td className="p-4">
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                    Active
-                  </span>
-                </td>
-
-                <td className="p-4 space-x-2">
-                  <button className="px-3 py-1 bg-blue-500 text-white rounded">
-                    Edit
-                  </button>
-
-                  <button className="px-3 py-1 bg-red-500 text-white rounded">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-
-              <tr className="border-t">
-                <td className="p-4">
-                  CRM System
-                </td>
-
-                <td className="p-4">
-                  XYZ Ltd
-                </td>
-
-                <td className="p-4">
-                  <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
-                    Pending
-                  </span>
-                </td>
-
-                <td className="p-4 space-x-2">
-                  <button className="px-3 py-1 bg-blue-500 text-white rounded">
-                    Edit
-                  </button>
-
-                  <button className="px-3 py-1 bg-red-500 text-white rounded">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <div className="bg-white rounded-xl p-6">
+            Loading projects...
+          </div>
+        ) : (
+          <ProjectsTable
+            projects={projects}
+          />
+        )}
       </div>
     </AdminLayout>
   );
