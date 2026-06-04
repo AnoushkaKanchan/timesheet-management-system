@@ -10,6 +10,8 @@ import {
   getTimesheetDetails,
   createTimesheet,
   updateTimesheet,
+  deleteTimesheet,
+  submitTimesheet,
   createTimesheetDetail,
   deleteTimesheetDetail
 } from "../../services/timesheetService";
@@ -18,7 +20,6 @@ function MyTimesheets() {
   const [timesheets, setTimesheets] = useState([]);
   const [filteredTimesheets, setFilteredTimesheets] = useState([]);
 
-  // Filters State Trackers
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
@@ -26,11 +27,9 @@ function MyTimesheets() {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Active Line Item Subsets
   const [selectedTimesheet, setSelectedTimesheet] = useState(null);
   const [timesheetDetails, setTimesheetDetails] = useState([]);
 
-  // Visibility Flags
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [modalMode, setModalMode] = useState("CREATE"); // "CREATE" | "EDIT"
@@ -39,7 +38,6 @@ function MyTimesheets() {
     fetchTimesheets();
   }, []);
 
-  // Structural Array filtering system
   useEffect(() => {
     let result = [...timesheets];
 
@@ -90,7 +88,6 @@ function MyTimesheets() {
     setIsFormOpen(true);
   };
 
-  // Check 5 optimization fix integrated directly inside edit launcher routine
   const handleEditOpen = async (timesheet) => {
     if (timesheet.is_locked) return;
 
@@ -114,7 +111,7 @@ function MyTimesheets() {
 
       if (modalMode === "CREATE") {
         await createTimesheet(masterData);
-        setIsFormOpen(false); // Close immediately on create per blueprint rule
+        setIsFormOpen(false);
       } else {
         await updateTimesheet(selectedTimesheet.id, masterData);
       }
@@ -128,7 +125,48 @@ function MyTimesheets() {
     }
   };
 
-  // Add Detail Line Flow
+  // Delete Master Workflow with Improvement 2 integrated
+  const handleDeleteTimesheet = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this timesheet?")) return;
+
+    try {
+      setError("");
+      await deleteTimesheet(id);
+      
+      // Cleanup open workspaces immediately if target row matches active modal context
+      if (selectedTimesheet?.id === id) {
+        setIsFormOpen(false);
+        setSelectedTimesheet(null);
+        setTimesheetDetails([]);
+      }
+      
+      await fetchTimesheets();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to discard target master sheet record.");
+    }
+  };
+
+  // Submit Master Workflow with Improvement 1 integrated
+  const handleSubmitTimesheet = async (id) => {
+    if (!window.confirm("Submit timesheet? This action will lock the timesheet.")) return;
+
+    try {
+      setError("");
+      await submitTimesheet(id);
+      
+      // Clean open editing panels upon submission lock down cascade
+      setIsFormOpen(false);
+      setSelectedTimesheet(null);
+      setTimesheetDetails([]);
+      
+      await fetchTimesheets();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to transition status vector via submission endpoint.");
+    }
+  };
+
   const handleAddDetailFlow = async (detailEntry) => {
     try {
       setError("");
@@ -137,11 +175,9 @@ function MyTimesheets() {
         ...detailEntry
       });
 
-      // Refetch detail listings context mapping arrays
       const updatedDetails = await getTimesheetDetails(selectedTimesheet.id);
       setTimesheetDetails(updatedDetails || []);
       
-      // Check 4 alignment optimization: auto-updates aggregate total_hours sum column fields
       const updatedMasters = await getTimesheets();
       setTimesheets(updatedMasters || []);
     } catch (err) {
@@ -150,7 +186,6 @@ function MyTimesheets() {
     }
   };
 
-  // Delete Detail Line Flow
   const handleDeleteDetailFlow = async (detailId) => {
     try {
       setError("");
@@ -170,8 +205,6 @@ function MyTimesheets() {
   return (
     <EmployeeLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
-        
-        {/* Module Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">My Timesheets</h1>
@@ -185,7 +218,6 @@ function MyTimesheets() {
           </button>
         </div>
 
-        {/* Feedback messages */}
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-600 rounded-xl font-medium">
             ⚠️ {error}
@@ -213,10 +245,13 @@ function MyTimesheets() {
             timesheets={filteredTimesheets}
             onView={handleView}
             onEdit={handleEditOpen}
+            onDelete={handleDeleteTimesheet}
+            onSubmit={handleSubmitTimesheet}
           />
         )}
       </div>
 
+      {/* Critical Bug Fixed: Setter function invoked correctly on close */}
       <TimesheetViewModal
         isOpen={isViewOpen}
         onClose={() => {

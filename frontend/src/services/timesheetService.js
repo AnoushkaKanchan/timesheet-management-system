@@ -40,7 +40,6 @@ export const getTimesheetDetails = async (timesheetId) => {
 };
 
 export const createTimesheetDetail = async (data) => {
-  // Uses timesheet_master exactly as required by backend serializer constraints
   const response = await apiClient.post(API_ENDPOINTS.TIMESHEET_DETAILS, data);
   return response.data;
 };
