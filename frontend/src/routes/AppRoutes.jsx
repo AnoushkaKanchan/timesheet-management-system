@@ -9,13 +9,10 @@ import Login from "../pages/auth/Login";
 import PrivateRoute from "./PrivateRoute";
 import RoleBasedRoute from "./RoleBasedRoute";
 
-function AdminDashboard() {
-  return (
-    <h1 className="p-8 text-3xl font-bold">
-      Admin Dashboard
-    </h1>
-  );
-}
+import Dashboard from "../pages/admin/Dashboard";
+import Projects from "../pages/admin/Projects";
+import Timesheets from "../pages/admin/Timesheets";
+import Reports from "../pages/admin/Reports";
 
 function EmployeeDashboard() {
   return (
@@ -38,10 +35,41 @@ function AppRoutes() {
           path="/admin/dashboard"
           element={
             <PrivateRoute>
-              <RoleBasedRoute
-                allowedRole="Admin"
-              >
-                <AdminDashboard />
+              <RoleBasedRoute allowedRole="Admin">
+                <Dashboard />
+              </RoleBasedRoute>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/projects"
+          element={
+            <PrivateRoute>
+              <RoleBasedRoute allowedRole="Admin">
+                <Projects />
+              </RoleBasedRoute>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/timesheets"
+            element={
+            <PrivateRoute>
+              <RoleBasedRoute allowedRole="Admin">
+                <Timesheets />
+              </RoleBasedRoute>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin/reports"
+          element={
+            <PrivateRoute>
+              <RoleBasedRoute allowedRole="Admin">
+                <Reports />
               </RoleBasedRoute>
             </PrivateRoute>
           }
