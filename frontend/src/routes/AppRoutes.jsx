@@ -9,10 +9,14 @@ import Login from "../pages/auth/Login";
 import PrivateRoute from "./PrivateRoute";
 import RoleBasedRoute from "./RoleBasedRoute";
 
+// Admin Pages
 import Dashboard from "../pages/admin/Dashboard";
 import Projects from "../pages/admin/Projects";
 import Timesheets from "../pages/admin/Timesheets";
 import Reports from "../pages/admin/Reports";
+
+// Employee Pages
+import MyTimesheets from "../pages/employee/MyTimesheets";
 
 function EmployeeDashboard() {
   return (
@@ -26,11 +30,14 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* Public */}
         <Route
           path="/login"
           element={<Login />}
         />
 
+        {/* Admin Routes */}
         <Route
           path="/admin/dashboard"
           element={
@@ -55,7 +62,7 @@ function AppRoutes() {
 
         <Route
           path="/admin/timesheets"
-            element={
+          element={
             <PrivateRoute>
               <RoleBasedRoute allowedRole="Admin">
                 <Timesheets />
@@ -75,18 +82,30 @@ function AppRoutes() {
           }
         />
 
+        {/* Employee Routes */}
+
         <Route
           path="/employee/dashboard"
           element={
             <PrivateRoute>
-              <RoleBasedRoute
-                allowedRole="Employee"
-              >
+              <RoleBasedRoute allowedRole="Employee">
                 <EmployeeDashboard />
               </RoleBasedRoute>
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/employee/timesheets"
+          element={
+            <PrivateRoute>
+              <RoleBasedRoute allowedRole="Employee">
+                <MyTimesheets />
+              </RoleBasedRoute>
+            </PrivateRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

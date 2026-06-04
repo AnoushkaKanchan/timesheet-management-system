@@ -23,27 +23,45 @@ function TimesheetViewModal({
           </button>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <strong>Employee:</strong>{" "}
-            {timesheet.user}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
-          <div>
-            <strong>Status:</strong>{" "}
-            {timesheet.status}
-          </div>
+  <div className="bg-slate-50 border rounded-lg p-4">
+    <p className="text-sm text-slate-500 mb-1">
+      Employee
+    </p>
+    <p className="font-semibold text-slate-900">
+      {timesheet.user}
+    </p>
+  </div>
 
-          <div>
-            <strong>Submission Date:</strong>{" "}
-            {timesheet.submission_date}
-          </div>
+  <div className="bg-slate-50 border rounded-lg p-4">
+    <p className="text-sm text-slate-500 mb-1">
+      Status
+    </p>
+    <p className="font-semibold text-slate-900">
+      {timesheet.status}
+    </p>
+  </div>
 
-          <div>
-            <strong>Total Hours:</strong>{" "}
-            {timesheet.total_hours}
-          </div>
-        </div>
+  <div className="bg-slate-50 border rounded-lg p-4">
+    <p className="text-sm text-slate-500 mb-1">
+      Submission Date
+    </p>
+    <p className="font-semibold text-slate-900">
+      {timesheet.submission_date}
+    </p>
+  </div>
+
+  <div className="bg-slate-50 border rounded-lg p-4">
+    <p className="text-sm text-slate-500 mb-1">
+      Total Hours
+    </p>
+    <p className="font-semibold text-slate-900">
+      {timesheet.total_hours}
+    </p>
+  </div>
+
+</div>
 
         <table className="w-full border">
           <thead>
