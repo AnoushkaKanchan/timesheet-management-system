@@ -17,9 +17,7 @@ export const getTimesheetById = async (id) => {
   return response.data;
 };
 
-export const getTimesheetDetails = async (
-  timesheetId
-) => {
+export const getTimesheetDetails = async (timesheetId) => {
   const response = await apiClient.get(
     `${API_ENDPOINTS.TIMESHEET_DETAILS}?timesheet_master=${timesheetId}`
   );

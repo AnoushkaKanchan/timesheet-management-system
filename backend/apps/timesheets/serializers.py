@@ -47,13 +47,18 @@ class TimesheetMasterSerializer(serializers.ModelSerializer):
         ]
 
 class TimesheetDetailSerializer(serializers.ModelSerializer):
-
+     
+    project_name = serializers.ReadOnlyField(
+        source="project.project_name"
+    )
+     
     class Meta:
         model = TimesheetDetail
         fields = [
             "id",
             "timesheet_master",
             "project",
+            "project_name",
             "hours_worked",
             "task_description",
             "created_at",

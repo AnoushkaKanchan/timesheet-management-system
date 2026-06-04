@@ -69,7 +69,7 @@ function TimesheetViewModal({
                 className="border-t"
               >
                 <td className="p-3">
-                  {detail.project}
+                  {detail.project_name}
                 </td>
 
                 <td className="p-3">
