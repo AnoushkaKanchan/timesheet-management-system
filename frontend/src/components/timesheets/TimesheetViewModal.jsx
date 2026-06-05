@@ -1,106 +1,71 @@
-function TimesheetViewModal({
-  isOpen,
-  onClose,
-  timesheet,
-  details,
-}) {
+import React from "react";
+
+function TimesheetViewModal({ isOpen, onClose, timesheet, details }) {
   if (!isOpen || !timesheet) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-4xl p-6">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl w-full max-w-4xl flex flex-col max-h-[85vh] overflow-hidden border border-slate-200 shadow-xl">
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
-            Timesheet Details
+        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50">
+          <h2 className="text-lg font-bold text-slate-900">
+            Timesheet Verification Summary
           </h2>
-
-          <button
-            onClick={onClose}
-            className="text-slate-500"
-          >
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm font-medium p-1">
             ✕
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 shadow-sm">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Employee Profile</p>
+              <p className="font-semibold text-slate-800 text-sm">{timesheet.user}</p>
+            </div>
 
-  <div className="bg-slate-50 border rounded-lg p-4">
-    <p className="text-sm text-slate-500 mb-1">
-      Employee
-    </p>
-    <p className="font-semibold text-slate-900">
-      {timesheet.user}
-    </p>
-  </div>
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 shadow-sm">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Submission Date</p>
+              <p className="font-semibold text-slate-800 text-sm">{timesheet.submission_date}</p>
+            </div>
 
-  <div className="bg-slate-50 border rounded-lg p-4">
-    <p className="text-sm text-slate-500 mb-1">
-      Status
-    </p>
-    <p className="font-semibold text-slate-900">
-      {timesheet.status}
-    </p>
-  </div>
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 shadow-sm">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Period Hours</p>
+              <p className="font-bold text-slate-900 text-sm font-mono">{Number(timesheet.total_hours || 0).toFixed(2)} hrs</p>
+            </div>
+          </div>
 
-  <div className="bg-slate-50 border rounded-lg p-4">
-    <p className="text-sm text-slate-500 mb-1">
-      Submission Date
-    </p>
-    <p className="font-semibold text-slate-900">
-      {timesheet.submission_date}
-    </p>
-  </div>
+          <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <table className="w-full text-left text-xs divide-y divide-slate-200">
+              <thead className="bg-slate-50 font-bold text-slate-500 uppercase tracking-wider">
+                <tr>
+                  <th className="px-4 py-3">Project Target</th>
+                  <th className="px-4 py-3">Task Description Summary</th>
+                  <th className="px-4 py-3 text-right">Hours</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-700 bg-white">
+                {details.map((detail) => (
+                  <tr key={detail.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-4 py-3.5 font-bold text-slate-900">{detail.project_name}</td>
+                    <td className="px-4 py-3.5 whitespace-pre-wrap max-w-sm">{detail.task_description}</td>
+                    <td className="px-4 py-3.5 text-right font-mono font-bold text-slate-900">
+                      {Number(detail.hours_worked).toFixed(2)} hrs
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-  <div className="bg-slate-50 border rounded-lg p-4">
-    <p className="text-sm text-slate-500 mb-1">
-      Total Hours
-    </p>
-    <p className="font-semibold text-slate-900">
-      {timesheet.total_hours}
-    </p>
-  </div>
-
-</div>
-
-        <table className="w-full border">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 text-left">
-                Project
-              </th>
-
-              <th className="p-3 text-left">
-                Hours
-              </th>
-
-              <th className="p-3 text-left">
-                Task Description
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {details.map((detail) => (
-              <tr
-                key={detail.id}
-                className="border-t"
-              >
-                <td className="p-3">
-                  {detail.project_name}
-                </td>
-
-                <td className="p-3">
-                  {detail.hours_worked}
-                </td>
-
-                <td className="p-3">
-                  {detail.task_description}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm transition-all"
+          >
+            Close Summary
+          </button>
+        </div>
 
       </div>
     </div>

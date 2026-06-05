@@ -1,76 +1,43 @@
-function getStatusClasses(status) {
-  switch (status) {
-    case "APPROVED":
-      return "bg-green-100 text-green-700";
+import React from "react";
 
-    case "REJECTED":
-      return "bg-red-100 text-red-700";
-
-    case "PENDING":
-      return "bg-yellow-100 text-yellow-700";
-
-    case "SENT_TO_CLIENT":
-      return "bg-blue-100 text-blue-700";
-
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-}
-
-function formatStatus(status) {
-  return status
-    .replaceAll("_", " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function TimesheetsTable({timesheets,onView}) {
+function TimesheetsTable({ timesheets, onView }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-slate-50">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+      <table className="w-full text-left text-sm divide-y divide-slate-200">
+        <thead className="bg-slate-50 text-xs uppercase font-bold text-slate-500 tracking-wider">
           <tr>
-            <th className="text-left p-4">Employee</th>
-            <th className="text-left p-4">Submission Date</th>
-            <th className="text-left p-4">Hours</th>
-            <th className="text-left p-4">Status</th>
-            <th className="text-left p-4">Action</th>
+            <th className="p-4">Employee</th>
+            <th className="p-4">Submission Date</th>
+            <th className="p-4">Hours Logged</th>
+            <th className="p-4 text-center">Action</th>
           </tr>
         </thead>
 
-        <tbody>
+        <tbody className="divide-y divide-slate-200 text-slate-700 bg-white">
           {timesheets.map((timesheet) => (
-            <tr key={timesheet.id} className="border-t">
-              <td className="p-4">{timesheet.user}</td>
+            <tr key={timesheet.id} className="hover:bg-slate-50/40 transition-colors">
+              <td className="p-4 font-medium text-slate-900">{timesheet.user}</td>
 
-              <td className="p-4">
-                {new Date(
-                  timesheet.submission_date
-                ).toLocaleDateString()}
+              <td className="p-4 text-slate-500">
+                {new Date(timesheet.submission_date).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
               </td>
 
-              <td className="p-4">
-                {timesheet.total_hours}
+              <td className="p-4 font-mono font-bold text-slate-800">
+                {Number(timesheet.total_hours || 0).toFixed(2)} hrs
               </td>
 
-              <td className="p-4">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${getStatusClasses(
-                    timesheet.status
-                  )}`}
+              <td className="p-4 text-center">
+                <button
+                  onClick={() => onView(timesheet)}
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
                 >
-                  {formatStatus(timesheet.status)}
-                </span>
+                  View Details
+                </button>
               </td>
-
-              <td className="p-4">
-  <button
-    onClick={() => onView(timesheet)}
-    className="px-3 py-1 bg-indigo-600 text-white rounded-lg"
-  >
-    View
-  </button>
-</td>
             </tr>
           ))}
         </tbody>

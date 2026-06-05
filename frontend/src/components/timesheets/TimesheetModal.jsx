@@ -21,35 +21,25 @@ function TimesheetModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col p-6 shadow-xl relative animate-fadeIn">
+      <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col p-6 shadow-xl relative overflow-y-auto">
         
-        {/* Modal Header */}
         <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
           <h2 className="text-xl font-bold text-slate-900">
             {isEditMode ? "Edit Timesheet Allocation Workspace" : "Create New Timesheet"}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-lg transition-colors"
-          >
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg transition-colors">
             ✕
           </button>
         </div>
 
-        {/* Scroll Body Space */}
-        <div className="flex-1 overflow-y-auto space-y-6 pr-1">
-          
-          {/* Master Section Form mapping */}
-          <div>
-            <TimesheetForm
-              timesheet={timesheet}
-              onSubmit={onMasterSubmit}
-              loading={loading}
-              mode={mode}
-            />
-          </div>
+        <div className="space-y-6 flex-1">
+          <TimesheetForm
+            timesheet={timesheet}
+            onSubmit={onMasterSubmit}
+            loading={loading}
+            mode={mode}
+          />
 
-          {/* Details form sections - ONLY active in edit context paths */}
           {isEditMode && (
             <div className="border-t border-slate-200 pt-5 space-y-4">
               <div className="flex items-center justify-between">
@@ -63,7 +53,6 @@ function TimesheetModal({
                 )}
               </div>
 
-              {/* Check 3 implementation compliance logic */}
               {!isLocked && <TimesheetDetailForm onAdd={onAddDetail} />}
 
               <TimesheetDetailsTable
