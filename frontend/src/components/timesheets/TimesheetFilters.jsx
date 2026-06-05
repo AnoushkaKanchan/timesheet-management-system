@@ -1,18 +1,23 @@
 import React from "react";
 
-function TimesheetFilters({ searchTerm, setSearchTerm }) {
+function TimesheetFilters({
+  searchTerm,
+  setSearchTerm,
+}) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-center">
-      <div className="relative w-full max-w-md">
-        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none text-sm">
-          📅
-        </span>
+      <div className="w-full max-w-md">
+        <label className="block text-sm font-medium text-slate-600 mb-2">
+          Filter by Submission Date
+        </label>
+
         <input
-          type="text"
-          placeholder="Search items by matching execution date (YYYY-MM-DD)..."
+          type="date"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all"
+          onChange={(e) =>
+            setSearchTerm(e.target.value)
+          }
+          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all"
         />
       </div>
     </div>

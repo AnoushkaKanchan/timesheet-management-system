@@ -1,15 +1,19 @@
 from django.urls import path
-from .views import ExportReportView, ReportListView
+from .views import (
+    ReportPreviewView,
+    ReportExportCSVView,
+)
 
 urlpatterns = [
     path(
         "",
-        ReportListView.as_view(),
-        name="report-list",
+        ReportPreviewView.as_view(),
+        name="report-preview",
     ),
+
     path(
         "export/",
-        ExportReportView.as_view(),
-        name="export-report",
+        ReportExportCSVView.as_view(),
+        name="report-export",
     ),
 ]

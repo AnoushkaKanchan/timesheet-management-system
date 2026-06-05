@@ -40,12 +40,11 @@ function Dashboard() {
     fetchMonthlyStats(newMonthValue);
   };
 
-  if (loading) {
+  if (loading && !dashboardData) {
     return (
       <AdminLayout>
-        <div className="max-w-7xl mx-auto p-16 text-center text-slate-400 font-medium">
-          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          Filtering ledger aggregations month wise...
+        <div className="p-8 text-center text-slate-500 font-medium">
+          Loading metrics reporting models...
         </div>
       </AdminLayout>
     );
@@ -54,31 +53,24 @@ function Dashboard() {
   if (error) {
     return (
       <AdminLayout>
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-600 rounded-xl font-medium shadow-sm">
-            ⚠️ {error}
-          </div>
-          <button 
-            onClick={() => fetchMonthlyStats(currentMonth)}
-            className="mt-4 px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 transition-colors"
-          >
-            Retry Connection
-          </button>
+        <div className="p-4 bg-red-50 border border-red-200 text-sm text-red-600 rounded-xl m-6">
+          ⚠️ {error}
         </div>
       </AdminLayout>
     );
   }
 
-  const { metrics, selectable_months } = dashboardData;
+  const metrics = dashboardData?.metrics || {};
+  const selectableMonths = dashboardData?.selectable_months || [];
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 max-w-7xl mx-auto px-4 py-2">
         
-        {/* Dynamic Month Filtering Top Header Panel */}
+        {/* Month Dropdown Container Selection Layer */}
         <MonthSelector
           selectedMonth={currentMonth}
-          selectableMonths={selectable_months}
+          selectableMonths={selectableMonths}
           onMonthChange={handleMonthToggle}
         />
 
@@ -106,8 +98,8 @@ function Dashboard() {
           />
 
           <DashboardCard
-            title="Pending Approval Queue"
-            value={metrics.pending_timesheets}
+            title="Submitted Submissions"
+            value={metrics.submitted_timesheets}
             icon="⏳"
             colorClass="text-amber-600"
           />

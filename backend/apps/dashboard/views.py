@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db.models import Sum, Value, DecimalField, Count
 from django.db.models.functions import Coalesce, TruncMonth
 from django.utils import timezone
@@ -6,11 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 
-# Shift from absolute 'apps.' prefixes to explicit workspace imports
 from ..projects.models import Project
 from ..users.models import User
 from ..timesheets.models import TimesheetMaster, TimesheetDetail
-
 
 
 class IsAdminRole(BasePermission):
@@ -42,34 +41,27 @@ class DashboardStatsView(APIView):
             now = timezone.now()
             year, month = now.year, now.month
 
-        # Base filtered querysets for the chosen operational month period
+        # 2. Build Scoped Monthly Base Querysets
         timesheet_master_month = TimesheetMaster.objects.filter(
-            submission_date__year=year, 
+            submission_date__year=year,
             submission_date__month=month
         )
+        
         timesheet_detail_month = TimesheetDetail.objects.filter(
             timesheet_master__submission_date__year=year,
             timesheet_master__submission_date__month=month
         )
 
-        # 2. Month-Specific Aggregations
-        monthly_hours = timesheet_detail_month.aggregate(
-            total=Coalesce(
-                Sum("hours_worked"),
-                Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
-            )
-        )["total"]
-
-        # 3. Compile Unique Available Months in DB for the Selection Dropdown Filter
-        available_months_qs = (
+        # 3. Compile Selectable Months History (for the dropdown component)
+        selectable_months = []
+        month_buckets = (
             TimesheetMaster.objects.annotate(month_bucket=TruncMonth("submission_date"))
             .values("month_bucket")
             .annotate(count=Count("id"))
             .order_by("-month_bucket")
         )
 
-        selectable_months = []
-        for item in available_months_qs:
+        for item in month_buckets:
             if item["month_bucket"]:
                 selectable_months.append({
                     "value": item["month_bucket"].strftime("%Y-%m"),      # e.g., "2026-06"
@@ -81,6 +73,20 @@ class DashboardStatsView(APIView):
             current_str = timezone.now().strftime("%Y-%m")
             current_lbl = timezone.now().strftime("%B %Y")
             selectable_months.append({"value": current_str, "label": current_lbl})
+
+        # 4. Aggregate Cumulative Logged Hours
+        total_hours_query = timesheet_detail_month.aggregate(
+            computed_hours=Coalesce(
+                Sum("hours_worked"),
+                Value(0.0),
+                output_field=DecimalField(max_digits=10, decimal_places=2)
+            )
+        )
+        
+        try:
+            total_hours_value = float(total_hours_query["computed_hours"])
+        except (ValueError, TypeError):
+            total_hours_value = 0.00
 
         # Construct Month-Wise Dashboard State Payload Object
         data = {
@@ -94,9 +100,9 @@ class DashboardStatsView(APIView):
                     id__in=timesheet_master_month.values_list("user_id", flat=True).distinct()
                 ).count(),
                 "total_timesheets_submitted": timesheet_master_month.count(),
-                "pending_timesheets": timesheet_master_month.filter(status="PENDING").count(),
+                "submitted_timesheets": timesheet_master_month.filter(is_locked=True).count(),
                 "locked_timesheets": timesheet_master_month.filter(is_locked=True).count(),
-                "total_hours_logged": monthly_hours,
+                "total_hours_logged": total_hours_value
             }
         }
 

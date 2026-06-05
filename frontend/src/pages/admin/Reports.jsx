@@ -16,7 +16,6 @@ function Reports() {
 
   const [filters, setFilters] = useState({
     project: "ALL",
-    status: "ALL",
     start_date: "",
     end_date: ""
   });
@@ -43,43 +42,67 @@ function Reports() {
     try {
       setLoading(true);
       setError("");
-      const data = await getReportPreview(activeFilters);
-      setReportData(data || { summary: { total_records: 0, total_hours: "0.00" }, results: [] });
+
+      const queryParams = {};
+      if (activeFilters.project && activeFilters.project !== "ALL") {
+        queryParams.project = activeFilters.project;
+      }
+      if (activeFilters.start_date) {
+        queryParams.start_date = activeFilters.start_date;
+      }
+      if (activeFilters.end_date) {
+        queryParams.end_date = activeFilters.end_date;
+      }
+
+      const response = await getReportPreview(queryParams);
+      setReportData(
+        response || {
+          summary: { total_records: 0, total_hours: "0.00" },
+          results: []
+        }
+      );
     } catch (err) {
-      console.error(err);
-      setError("Failed to query real-time data rows from backend.");
+      console.error("Failed to query records payload:", err);
+      setError("Failed to compile targeted reports workspace view models.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleResetFilters = () => {
-    const cleared = { project: "ALL", status: "ALL", start_date: "", end_date: "" };
-    setFilters(cleared);
-    handleFetchReport(cleared);
+    const freshFilters = {
+      project: "ALL",
+      start_date: "",
+      end_date: ""
+    };
+    setFilters(freshFilters);
+    handleFetchReport(freshFilters);
   };
 
   const handleExportCSV = async () => {
     try {
       setError("");
-      const blobData = await exportReportCSV(filters);
-      
-      const url = window.URL.createObjectURL(new Blob([blobData]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `Filtered_Timesheet_Report_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
+      const queryParams = {};
+      if (filters.project && filters.project !== "ALL") {
+        queryParams.project = filters.project;
+      }
+      if (filters.start_date) {
+        queryParams.start_date = filters.start_date;
+      }
+      if (filters.end_date) {
+        queryParams.end_date = filters.end_date;
+      }
+
+      await exportReportCSV(queryParams);
     } catch (err) {
-      console.error(err);
-      setError("An error occurred during report document stream compilation.");
+      console.error("Failed to execute data stream translation file transmission:", err);
+      setError("Failed to generate and stream download tabular target reports schema spreadsheet.");
     }
   };
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 max-w-7xl mx-auto px-4 py-2">
         {/* Main Section Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
           <div>
