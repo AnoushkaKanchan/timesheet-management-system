@@ -41,7 +41,7 @@ function Login() {
       console.log("User Payload Data:", data.user);
 
       // 2. Extract role safely handling both Case 1 and Case 2 payload variations
-      const roleName = data.user?.role?.role_name || data.user?.role_name;
+      const roleName = data.user?.role;
 
       // 3. Conditional route navigation based on user privilege level
       if (roleName === "Admin") {

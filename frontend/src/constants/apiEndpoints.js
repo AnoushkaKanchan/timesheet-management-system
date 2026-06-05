@@ -7,5 +7,6 @@ export const API_ENDPOINTS = {
   TIMESHEETS: "/timesheets/",
   TIMESHEET_DETAILS: "/timesheets/details/",
 
+  REPORTS: "/reports/",
   REPORT_EXPORT: "/reports/export/",
 };
