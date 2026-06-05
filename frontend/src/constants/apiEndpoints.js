@@ -2,6 +2,8 @@ export const API_ENDPOINTS = {
   LOGIN: "/auth/login/",
   ME: "/auth/me/",
 
+  DASHBOARD_STATS: "/dashboard/stats/",
+
   PROJECTS: "/projects/",
 
   TIMESHEETS: "/timesheets/",

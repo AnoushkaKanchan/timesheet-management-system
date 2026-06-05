@@ -14,4 +14,5 @@ urlpatterns = [
     path("api/timesheets/",include("apps.timesheets.urls")),
     path("api/timesheets/",include("apps.timesheets.urls")),
     path("api/reports/",include("apps.reports.urls"),),
+    path("api/dashboard/", include("apps.dashboard.urls")),
 ]

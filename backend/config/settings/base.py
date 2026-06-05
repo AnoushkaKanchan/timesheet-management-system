@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.timesheets",
     "apps.reports",
     "apps.logs",
+    "apps.dashboard",
 ]
 
 MIDDLEWARE = [
