@@ -1,9 +1,7 @@
 from rest_framework import serializers
 from .models import TimesheetMaster, TimesheetDetail
-from django.db.models import Sum
 
 class TimesheetMasterSerializer(serializers.ModelSerializer):
-
     user = serializers.ReadOnlyField(
         source="user.email"
     )
@@ -20,14 +18,9 @@ class TimesheetMasterSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "submission_date",
-            "status",
             "total_hours",
             "is_locked",
-            "sent_to_client_at",
             "submitted_at",
-            "reviewed_at",
-            "reviewed_by",
-            "comments",
             "created_at",
             "updated_at",
         ]
@@ -37,17 +30,13 @@ class TimesheetMasterSerializer(serializers.ModelSerializer):
             "user",
             "total_hours",
             "is_locked",
-            "sent_to_client_at",
             "submitted_at",
-            "reviewed_at",
-            "reviewed_by",
             "created_at",
             "updated_at",
-            "status",
         ]
 
+
 class TimesheetDetailSerializer(serializers.ModelSerializer):
-     
     project_name = serializers.ReadOnlyField(
         source="project.project_name"
     )

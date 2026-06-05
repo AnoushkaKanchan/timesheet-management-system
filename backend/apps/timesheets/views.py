@@ -105,15 +105,13 @@ class TimesheetRetrieveUpdateDeleteView(
         )
     
 class SubmitTimesheetView(APIView):
-
     permission_classes = [
         IsAuthenticated,
         IsOwnerOrAdmin
     ]
 
     def post(self, request, pk):
-
-        timesheet = get_object_or_404(TimesheetMaster,pk=pk)
+        timesheet = get_object_or_404(TimesheetMaster, pk=pk)
 
         self.check_object_permissions(
             request,
@@ -128,7 +126,7 @@ class SubmitTimesheetView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        timesheet.status = "PENDING"
+        # Removed timesheet.status = "PENDING"
         timesheet.is_locked = True
         timesheet.submitted_at = timezone.now()
 
