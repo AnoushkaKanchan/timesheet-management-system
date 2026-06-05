@@ -4,14 +4,10 @@ from django.conf import settings
 
 
 class TimesheetMaster(models.Model):
-
-    STATUS_CHOICES = [
-        ("PENDING", "Pending"),
-        ("APPROVED", "Approved"),
-        ("REJECTED", "Rejected"),
-        ("SENT_TO_CLIENT", "Sent To Client"),
-    ]
-
+    """
+    Core master tracking head. Keeps structural context metrics bound to 
+    submission execution dates, ownership profiles, and record locks.
+    """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -19,40 +15,12 @@ class TimesheetMaster(models.Model):
     )
 
     submission_date = models.DateField()
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="PENDING"
-    )
     
     is_locked = models.BooleanField(
-    default=False
-    )
-
-    sent_to_client_at = models.DateTimeField(
-        null=True,
-        blank=True
+        default=False
     )
 
     submitted_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    reviewed_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-
-    reviewed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="reviewed_timesheets"
-    )
-
-    comments = models.TextField(
         null=True,
         blank=True
     )
@@ -70,7 +38,10 @@ class TimesheetMaster(models.Model):
     
     
 class TimesheetDetail(models.Model):
-
+    """
+    Granular task-level breakdown line entries referencing logged hours worked 
+    and target project foreign keys.
+    """
     timesheet_master = models.ForeignKey(
         TimesheetMaster,
         on_delete=models.CASCADE,
@@ -99,7 +70,4 @@ class TimesheetDetail(models.Model):
     )
 
     def __str__(self):
-        return (
-            f"{self.project.project_name} "
-            f"- {self.hours_worked} hrs"
-        )
+        return f"{self.project.project_name} - {self.hours_worked} hrs"

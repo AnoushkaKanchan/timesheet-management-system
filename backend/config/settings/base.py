@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.timesheets",
     "apps.reports",
     "apps.logs",
+    "apps.dashboard",
 ]
 
 MIDDLEWARE = [
@@ -168,6 +169,7 @@ STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 AUTH_USER_MODEL = 'users.User'

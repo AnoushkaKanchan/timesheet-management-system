@@ -13,18 +13,16 @@ class TimesheetMasterAdmin(admin.ModelAdmin):
         "id",
         "user",
         "submission_date",
-        "status",
         "is_locked",
         "submitted_at",
-        "sent_to_client_at",
     )
 
     search_fields = (
         "user__email",
     )
 
+    # Completely purged "status" from filters here
     list_filter = (
-        "status",
         "is_locked",
         "submission_date",
     )
