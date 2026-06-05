@@ -1,7 +1,7 @@
 import csv
 from django.http import HttpResponse
 from django.db.models import Sum, DecimalField, Value
-from django.db.models.functions import Cast, Coalesce
+from django.db.models.functions import Coalesce
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,7 +13,7 @@ from .serializers import ReportRowSerializer
 
 class ExportReportView(APIView):
     """
-    Existing CSV export view - remains completely unchanged.
+    Hardened CSV export view supporting dynamic matching query parameter filters.
     """
     permission_classes = [IsAdminUser]
 
@@ -31,17 +31,29 @@ class ExportReportView(APIView):
             "Status",
         ])
 
-        details = (
-            TimesheetDetail.objects
-            .select_related(
-                "timesheet_master",
-                "timesheet_master__user",
-                "project",
-            )
-            .all()
+        # Optimize relation pre-fetches
+        queryset = TimesheetDetail.objects.select_related(
+            "timesheet_master",
+            "timesheet_master__user",
+            "project",
         )
 
-        for detail in details:
+        # Parse identical incoming filter parameters
+        project_id = request.query_params.get("project")
+        status = request.query_params.get("status")
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
+
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+        if status:
+            queryset = queryset.filter(timesheet_master__status=status)
+        if start_date:
+            queryset = queryset.filter(timesheet_master__submission_date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(timesheet_master__submission_date__lte=end_date)
+
+        for detail in queryset:
             writer.writerow([
                 detail.timesheet_master.user.email,
                 detail.timesheet_master.submission_date,
@@ -56,45 +68,33 @@ class ExportReportView(APIView):
 
 class ReportListView(APIView):
     """
-    Hardened report JSON preview list endpoint with type-safe summary calculations.
+    Report JSON preview list endpoint with type-safe summary calculations.
     """
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        # Base database optimization query path
         queryset = TimesheetDetail.objects.select_related(
             "timesheet_master",
             "timesheet_master__user",
             "project",
         )
 
-        # Extract filtering parameters
-        employee_id = request.query_params.get("employee")
         project_id = request.query_params.get("project")
         status = request.query_params.get("status")
         start_date = request.query_params.get("start_date")
         end_date = request.query_params.get("end_date")
 
-        # Evaluate and apply filters sequentially
-        if employee_id:
-            queryset = queryset.filter(timesheet_master__user_id=employee_id)
-            
         if project_id:
             queryset = queryset.filter(project_id=project_id)
-            
         if status:
             queryset = queryset.filter(timesheet_master__status=status)
-            
         if start_date:
             queryset = queryset.filter(timesheet_master__submission_date__gte=start_date)
-            
         if end_date:
             queryset = queryset.filter(timesheet_master__submission_date__lte=end_date)
 
-        # Record counting
         total_records = queryset.count()
         
-        # Type-safe hours summation using explicit Cast to FloatField/DecimalField
         summary_stats = queryset.aggregate(
             computed_hours=Coalesce(
                 Sum("hours_worked"), 
@@ -103,13 +103,11 @@ class ReportListView(APIView):
             )
         )
         
-        # Safely convert to float and format to 2 decimal places
         try:
             total_hours = f"{float(summary_stats['computed_hours']):.2f}"
         except (ValueError, TypeError):
             total_hours = "0.00"
 
-        # Serialize results output
         serializer = ReportRowSerializer(queryset, many=True)
 
         return Response({
