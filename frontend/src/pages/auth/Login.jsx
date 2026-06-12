@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { loginUser } from "../../services/authService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; 
 
 function Login() {
   const { login } = useAuth();
@@ -110,6 +110,15 @@ function Login() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        {/* ➕ Added Step 5 Registration Interface Trigger Row */}
+        <div className="text-center pt-4 mt-4 border-t text-sm text-slate-500">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-indigo-600 hover:underline font-semibold">
+            Register
+          </Link>
+        </div>
+
       </div>
     </div>
   );

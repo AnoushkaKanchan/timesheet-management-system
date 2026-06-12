@@ -2,9 +2,11 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 
 import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register"; 
 
 import PrivateRoute from "./PrivateRoute";
 import RoleBasedRoute from "./RoleBasedRoute";
@@ -18,6 +20,7 @@ import Reports from "../pages/admin/Reports";
 // Employee Pages
 import MyTimesheets from "../pages/employee/MyTimesheets";
 
+
 function EmployeeDashboard() {
   return (
     <h1 className="p-8 text-3xl font-bold">
@@ -29,12 +32,19 @@ function EmployeeDashboard() {
 function AppRoutes() {
   return (
     <BrowserRouter>
+      {/* 🔮 Consolidated into exactly ONE clean tracking block */}
       <Routes>
 
-        {/* Public */}
+        {/* Public Routes */}
         <Route
           path="/login"
           element={<Login />}
+        />
+        
+        {/* ➕ Added Open Unauthenticated Registration Path */}
+        <Route
+          path="/register"
+          element={<Register />}
         />
 
         {/* Admin Routes */}
@@ -83,7 +93,6 @@ function AppRoutes() {
         />
 
         {/* Employee Routes */}
-
         <Route
           path="/employee/dashboard"
           element={
@@ -105,6 +114,9 @@ function AppRoutes() {
             </PrivateRoute>
           }
         />
+
+        {/* Catch-all global tracking fallback */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
     </BrowserRouter>
