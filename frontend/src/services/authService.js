@@ -17,3 +17,9 @@ export const getCurrentUser = async () => {
 
   return response.data;
 };
+
+export const registerUser = async (registrationPayload) => {
+  // Payload input signature: { first_name, last_name, username, password, password_confirm }
+  const response = await apiClient.post(API_ENDPOINTS.REGISTER, registrationPayload);
+  return response.data;
+};

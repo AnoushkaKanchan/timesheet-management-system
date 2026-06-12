@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from .views import LoginView, CurrentUserView
 
 urlpatterns = [
@@ -13,4 +13,6 @@ urlpatterns = [
         CurrentUserView.as_view(),
         name="current-user",
     ),
+
+    path("", include("apps.users.urls")),
 ]
